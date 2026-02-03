@@ -1,10 +1,19 @@
 import streamlit as st
 import os
 from dotenv import load_dotenv
-import app  # Import the main app logic
 
-# 환경 변수 로드
+# Streamlit Cloud 배포 시 secrets를 환경 변수로 로드 (다른 모듈 임포트 전에 수행)
+# .env 파일이 없는 환경(Streamlit Cloud 등)에서 st.secrets를 os.environ으로 복사하여
+# pydantic-settings 등이 환경변수를 인식할 수 있게 함
+if hasattr(st, "secrets"):
+    for key, value in st.secrets.items():
+        if isinstance(value, str):
+            os.environ[key] = value
+
+# 로컬 개발 환경용 (.env 파일 로드)
 load_dotenv()
+
+import app  # Import the main app logic
 
 # 페이지 설정 (전역 설정, 로그인 화면과 메인 앱 모두에 적용됨)
 st.set_page_config(
