@@ -1,5 +1,6 @@
 import streamlit as st
 from models.output_models import CompanyResearch
+from config.prompts import DEEP_RESEARCH_PROMPT
 
 def render_step3():
     st.header("3단계: 기업 리서치 (Deep Research)")
@@ -26,7 +27,14 @@ def render_step3():
     # 기존에 저장된 값이 있으면 불러오기
     current_content = ""
     if state.get("company_research"):
-        current_content = state["company_research"].get("content", "")
+        company_research = state["company_research"]
+
+        if isinstance(company_research, CompanyResearch):
+            current_content = company_research.content
+        elif isinstance(company_research, dict):
+            current_content = company_research.get("content", "")
+        else:
+            current_content = str(company_research)
         
     research_content = st.text_area(
         "리서치 리포트 내용을 여기에 붙여넣으세요:",
@@ -69,24 +77,9 @@ def _generate_research_prompt(state) -> str:
     position = state.get("position_name", "")
     job_posting = state.get("job_posting", "")
     
-    prompt = f"""당신은 기업 분석 전문가입니다. 아래 채용 공고를 바탕으로 '{company}' 기업과 '{position}' 직무에 대한 심층 리서치 보고서를 작성해주세요.
-
-[분석 대상]
-- 기업명: {company}
-- 지원 직무: {position}
-
-[채용 공고 내용]
-{job_posting}
-
-[요청 사항]
-다음 항목들을 포함하여 상세하게 분석해주세요:
-1. 기업 개요 및 주요 사업 영역 (최근 실적 포함)
-2. 최근 1년 내 주요 이슈 및 뉴스 (긍정/부정)
-3. 현재 경영 방향 및 비전 (신년사, CEO 메시지 등 참고)
-4. 조직 문화 및 인재상
-5. 해당 직무({position})의 핵심 역할 및 요구 역량 분석
-6. 업계 동향 및 경쟁사 현황
-
-보고서는 자기소개서 작성 전략 수립에 활용될 예정이므로, 구체적인 사실(Fact) 위주로 정리해주세요."""
-
+    prompt = DEEP_RESEARCH_PROMPT.format(
+        company=company,
+        position=position,
+        job_posting=job_posting
+    )
     return prompt

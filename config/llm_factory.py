@@ -45,3 +45,16 @@ def get_chat_model(
         temperature=_temperature,
         api_key=api_key
     )
+
+# 모델 정의
+# 이력서 파싱 llm
+parsing_user_data_llm = get_chat_model("google_genai", "gemini-2.5-flash", temperature=0)
+
+# 단일 문항 피드백 검토 및 최종생성 llm
+final_llm = get_chat_model("google_genai", "gemini-3-pro-preview", temperature=0.7)
+
+# 사용자 입력값 검증 llm
+input_validation_llm = get_chat_model("google_genai", "gemini-2.5-flash-lite", temperature=0)
+
+# 초안 생성 llm
+draft_llm = get_chat_model("google_genai", "gemini-3-pro-preview", temperature=1.0)

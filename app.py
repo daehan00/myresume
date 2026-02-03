@@ -15,6 +15,8 @@ from ui.pages.step3_research import render_step3
 from ui.pages.step4_strategy import render_step4
 from ui.pages.step5_guidelines import render_step5
 from ui.pages.step6_essay import render_step6
+from ui.pages.step7_review import render_step7
+from ui.pages.step8_final import render_step8
 
 st.set_page_config(
     page_title="Resume Assistant",
@@ -40,17 +42,12 @@ def init_session_state():
             step_status="대기중",
             messages=[],
             company_research=None,
-            writing_strategy=None
+            writing_strategy=None,
+            writing_guidelines=None,
         )
 
 def main():
     init_session_state()
-    
-    state = st.session_state.resume_state
-    
-    # 도달한 최대 단계 업데이트
-    if state["current_step"] > state["max_step"]:
-        state["max_step"] = state["current_step"]
     
     # 사이드바 렌더링
     with st.sidebar:
@@ -72,6 +69,10 @@ def main():
         render_step5()
     elif step == 6:
         render_step6()
+    elif step == 7:
+        render_step7()
+    elif step == 8:
+        render_step8()
     else:
         st.error(f"알 수 없는 단계입니다: {step}")
 

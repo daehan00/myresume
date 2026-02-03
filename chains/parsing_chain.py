@@ -1,8 +1,7 @@
 from langchain_core.prompts import ChatPromptTemplate
 from pydantic import BaseModel, Field
 from typing import List
-from config.settings import settings
-from config.llm_factory import get_chat_model
+from config.llm_factory import parsing_user_data_llm
 from models.input_models import Experience
 
 # Pydantic 모델 정의 (출력 파싱용)
@@ -13,16 +12,8 @@ class ExperienceList(BaseModel):
 def create_experience_parsing_chain():
     """비정형 텍스트에서 경험 정보를 추출하는 체인"""
     
-    # 통합 LLM 팩토리 사용
-    # 정형 데이터 추출이므로 temperature=0 설정
-    try:
-        llm = get_chat_model(temperature=0)
-    except Exception:
-        # 키 설정 등이 잘못된 경우
-        return None
-    
     # 최신 LangChain: with_structured_output() 사용
-    structured_llm = llm.with_structured_output(ExperienceList)
+    structured_llm = parsing_user_data_llm.with_structured_output(ExperienceList)
     
     prompt = ChatPromptTemplate.from_messages([
         ("system", """당신은 이력서 데이터 구조화 전문가입니다.

@@ -1,9 +1,8 @@
-from langchain_core.prompts import ChatPromptTemplate
 from pydantic import BaseModel, Field
-from typing import List, Literal, Optional
-from config.llm_factory import get_chat_model
+from typing import List, Literal
+from config.llm_factory import input_validation_llm
+from config.prompts import INPUT_VALIDATION_PROMPT
 from models.state import ResumeState
-from tools.web_scraper import scrape_job_posting
 
 # 검증 결과 모델
 class ValidationItem(BaseModel):
@@ -25,71 +24,11 @@ class ValidationResult(BaseModel):
 def create_validation_chain():
     """입력 데이터 충분성 검증 체인"""
     
-    try:
-        # 검증은 논리적이여야 하므로 temperature 0
-        llm = get_chat_model("google_genai", "gemini-2.5-flash", temperature=0)
-    except Exception:
-        return None
-    
     # 최신 LangChain: with_structured_output 사용
-    structured_llm = llm.with_structured_output(ValidationResult)
-    
-    prompt = ChatPromptTemplate.from_messages([
-        ("system", """당신은 채용 전문가입니다. 지원자가 입력한 정보가 자기소개서를 작성하기에 충분한지 검증하세요.
-
-# 검증 기준
-1. 회사명 & 채용공고 교차 검증:
-   - 입력된 회사명이 채용공고 내용에 실제로 나타나는가?
-   - 입력된 직무명이 채용공고의 직무/포지션과 일치하는가?
-   - 불일치 시 '불명확', 일부만 일치 시 '불명확', 명확히 일치 시 '충분'
-   
-2. 채용공고 내용:
-   - 직무 설명, 주요 업무, 자격요건이 구체적으로 포함되어 있는가?
-   - 너무 짧거나 제목/개요만 있으면 '부족'
-
-# 채용공고 정리 규칙 (cleaned_job_posting)
-원본 채용공고에서 아래 내용만 추출하여 깔금하게 정리하세요:
-
-**포함할 내용:**
-- 회사 소개 (비전, 사업 영역, 규모 등 핵심만)
-- 모집 직무/포지션 명칭
-- 직무 설명 (역할, 책임)
-- 주요 업무 내용
-- 필수 자격요건
-- 우대 자격요건
-- 기대하는 역량/특성
-- 인재상 또는 조직문화
-- 혁심 과제/프로젝트 (있는 경우)
-- 복리후생 (간략하게)
-
-**제거할 내용:**
-- 웹사이트 네비게이션 메뉴 ("홈", "채용정보", "로그인" 등)
-- 페이지 헤더/푸터 ("분야별 채용", "지원하기" 버튼 등)
-- 광고성 문구 ("최고의 기회", "함께 성장할" 등 과장된 표현)
-- 중복된 컨텐츠
-- 지원 방법/절차 안내 ("이력서 제출", "면접 일정" 등)
-- 불필요한 디자인 요소 ("---", "===" 등)
-- 무의미한 반복 문구
-
-최종 출력은 명료하고 구조화되어야 하며, 지원서 작성에 직접 활용할 수 있는 형태여야 합니다.
-
-# 출력 규칙
-각 항목별로 '충분', '부족', '불명확' 중 하나로 판정하고 이유를 적으세요.
-부족하거나 불명확한 항목이 있다면, 이를 보완하기 위해 사용자에게 할 질문을 생성하세요.
-모든 항목이 '충분'이어야 overall_status가 'PASS'가 됩니다.
-
-중요: 회사명과 직무명이 채용공고와 일치하는지 교차 검증을 반드시 수행하세요."""),
-        ("user", """
-[입력 데이터]
-회사명: {company_name}
-지원 직무: {position_name}
-
-[채용공고 원문 - 정리가 필요함]
-{job_posting}""")
-    ])
-    
+    structured_llm = input_validation_llm.with_structured_output(ValidationResult)
+        
     # 최신 LCEL: prompt | structured_llm
-    chain = prompt | structured_llm
+    chain = INPUT_VALIDATION_PROMPT | structured_llm
     return chain
 
 def validate_resume_input(state: ResumeState) -> ValidationResult:

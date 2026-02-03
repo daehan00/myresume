@@ -37,7 +37,7 @@ def render_step5():
     if update_submitted:
         if edited_guidelines and edited_guidelines != state["writing_guidelines"]:
             with st.spinner("🤖 AI가 수정된 가이드를 검토하고 업데이트 중입니다..."):
-                updated_text = ai_validate_guidelines(edited_guidelines)
+                updated_text = ai_validate_guidelines(edited_guidelines).improved_guideline
                 state["writing_guidelines"] = updated_text
                 st.success("✅ 가이드라인이 업데이트되었습니다!")
                 st.rerun()

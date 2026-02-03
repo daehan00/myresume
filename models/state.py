@@ -23,6 +23,16 @@ class ResumeState(TypedDict):
     
     # 4단계: 전략 수립
     writing_strategy: Optional[WritingStrategy] # 작성 전략
+
+    # 5단계: 가이드라인 작성
+    writing_guidelines: Optional[str]
+
+    # 6단계: 자기소개서 초안 작성
+    # page에서 초기화
+    # generated_drafts: dict
+    # draft_models: list[str]
+    # draft_selections: dict
+    # draft_feedbacks: dict
     
     # 메타 정보
     current_step: int                   # 현재 단계 (1-8)
