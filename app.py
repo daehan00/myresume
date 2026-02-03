@@ -18,13 +18,6 @@ from ui.pages.step6_essay import render_step6
 from ui.pages.step7_review import render_step7
 from ui.pages.step8_final import render_step8
 
-st.set_page_config(
-    page_title="Resume Assistant",
-    page_icon="📝",
-    layout="wide",
-    initial_sidebar_state="expanded",
-)
-
 def init_session_state():
     """세션 상태 초기화"""
     if "resume_state" not in st.session_state:
@@ -77,4 +70,10 @@ def main():
         st.error(f"알 수 없는 단계입니다: {step}")
 
 if __name__ == "__main__":
+    st.set_page_config(
+        page_title="Resume Assistant",
+        page_icon="📝",
+        layout="wide",
+        initial_sidebar_state="expanded",
+    )
     main()
